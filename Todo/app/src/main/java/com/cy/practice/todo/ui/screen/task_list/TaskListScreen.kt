@@ -2,8 +2,11 @@ package com.cy.practice.todo.ui.screen.task_list
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ListItem
@@ -25,16 +28,33 @@ import com.cy.practice.todo.domain.model.Task
 @Composable
 fun TaskListScreen(modifier: Modifier = Modifier, vm: TaskListViewModel = hiltViewModel()) {
     val uiState by vm.uiState.collectAsStateWithLifecycle()
-    TaskListScreen(uiState, modifier)
+    TaskListScreen(uiState, vm::onAction, modifier)
 }
 
 @Composable
 fun TaskListScreen(
     state: TaskListState,
+    onAction: (TaskListAction) -> Unit,
     modifier: Modifier = Modifier
 ) {
 
-    TaskList(state.tasks, { _, _ -> }, modifier = modifier)
+    Column(modifier = modifier) {
+        TaskList(
+            state.tasks,
+            { task, isChecked ->
+                onAction(TaskListAction.EditTask(task.copy(isDone = isChecked)))
+            },
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
+        )
+        Button(
+            onClick = { onAction(TaskListAction.AddTask) },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Add Task")
+        }
+    }
 }
 
 
