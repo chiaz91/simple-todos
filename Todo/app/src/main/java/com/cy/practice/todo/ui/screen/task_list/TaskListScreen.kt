@@ -3,34 +3,68 @@ package com.cy.practice.todo.ui.screen.task_list
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.cy.practice.todo.R
 import com.cy.practice.todo.domain.model.Task
 import com.cy.practice.todo.ui.screen.task_list.component.NewTaskBottomSheet
 import com.cy.practice.todo.ui.screen.task_list.component.TaskList
 import com.cy.practice.todo.ui.theme.TodoTheme
+import com.cy.practice.todo.util.ObserveAsEvents
+import kotlinx.coroutines.launch
 
 
 @Composable
 fun TaskListScreen(modifier: Modifier = Modifier, vm: TaskListViewModel = hiltViewModel()) {
     val uiState by vm.uiState.collectAsStateWithLifecycle()
-    TaskListScreen(uiState, vm::onAction, modifier)
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+
+    ObserveAsEvents(vm.event) { event ->
+        when (event) {
+            is TaskListEvent.TaskDeleted -> scope.launch {
+                snackbarHostState.currentSnackbarData?.dismiss()
+                val lastDeleted = event.task
+                val result = snackbarHostState.showSnackbar(
+                    message = "Task '${lastDeleted.name}' deleted",
+                    actionLabel = "Undo",
+                    duration = SnackbarDuration.Short
+                )
+                if (result == SnackbarResult.ActionPerformed) {
+                    vm.onAction(TaskListAction.AddTask(lastDeleted))
+                }
+            }
+
+            else -> Unit
+        }
+    }
+
+    TaskListScreen(uiState, vm::onAction, modifier, snackbarHostState)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -38,34 +72,45 @@ fun TaskListScreen(modifier: Modifier = Modifier, vm: TaskListViewModel = hiltVi
 fun TaskListScreen(
     state: TaskListState,
     onAction: (TaskListAction) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
 ) {
     var showAddTask by rememberSaveable { mutableStateOf(false) }
 
-    Column(modifier = modifier.imePadding()) {
-        TaskList(
-            state.tasks,
-            { task ->
-                onAction(TaskListAction.EditTask(task.copy(isDone = !task.isDone)))
-            },
-            { task, isChecked ->
-                onAction(TaskListAction.EditTask(task.copy(isDone = isChecked)))
-            },
-            { task -> onAction(TaskListAction.DeleteTask(task)) },
-            modifier = Modifier.weight(1f)
-        )
-
-        TextButton(
-            onClick = { showAddTask = true },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Icon(
-                imageVector = Icons.Default.Add,
-                contentDescription = "Add new task",
-                modifier = Modifier.size(ButtonDefaults.IconSize)
+    Scaffold(
+        modifier = modifier,
+        topBar = {
+            TopAppBar(
+                title = { Text(text = stringResource(R.string.app_name)) }
             )
-            Spacer(modifier = Modifier.size(ButtonDefaults.IconSpacing))
-            Text("Add Task")
+        },
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+    ) { innerPadding ->
+        Column(modifier = Modifier.padding(innerPadding)) {
+            TaskList(
+                state.tasks,
+                { task ->
+                    onAction(TaskListAction.EditTask(task.copy(isDone = !task.isDone)))
+                },
+                { task, isChecked ->
+                    onAction(TaskListAction.EditTask(task.copy(isDone = isChecked)))
+                },
+                { task -> onAction(TaskListAction.DeleteTask(task)) },
+                modifier = Modifier.weight(1f)
+            )
+
+            TextButton(
+                onClick = { showAddTask = true },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Add new task",
+                    modifier = Modifier.size(ButtonDefaults.IconSize)
+                )
+                Spacer(modifier = Modifier.size(ButtonDefaults.IconSpacing))
+                Text("Add Task")
+            }
         }
     }
 
@@ -83,8 +128,8 @@ fun TaskListScreen(
 fun TaskScreenPreview(modifier: Modifier = Modifier) {
     val state = TaskListState(
         tasks = listOf(
-            Task(1, "Task 1", "", false),
-            Task(2, "Task 2", "With note", true)
+            Task(0, "Do homework", "", true),
+            Task(1, "Do exercise", "", false)
         )
     )
     TodoTheme {
