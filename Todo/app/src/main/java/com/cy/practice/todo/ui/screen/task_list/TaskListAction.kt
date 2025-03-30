@@ -4,7 +4,7 @@ import com.cy.practice.todo.domain.model.Task
 
 
 sealed class TaskListAction {
-    data object AddTask : TaskListAction()
+    data class AddTask(val task: Task) : TaskListAction()
     data class EditTask(val task: Task) : TaskListAction()
     data class DeleteTask(val task: Task) : TaskListAction()
 }

@@ -36,11 +36,7 @@ class TaskListViewModel @Inject constructor(
 
     fun onAction(action: TaskListAction) {
         when (action) {
-            is TaskListAction.AddTask -> {
-                // create a dummy task
-                addTask(Task(name = "New Task"))
-            }
-
+            is TaskListAction.AddTask -> addTask(action.task)
             is TaskListAction.EditTask -> editTask(action.task)
             is TaskListAction.DeleteTask -> deleteTask(action.task)
         }
