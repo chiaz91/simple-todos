@@ -40,7 +40,12 @@ import kotlinx.coroutines.launch
 
 
 @Composable
-fun TaskListScreen(modifier: Modifier = Modifier, vm: TaskListViewModel = hiltViewModel()) {
+fun TaskListScreen(
+    onAddTask: () -> Unit,
+    onEditTask: (Long) -> Unit,
+    modifier: Modifier = Modifier,
+    vm: TaskListViewModel = hiltViewModel()
+) {
     val uiState by vm.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
@@ -64,13 +69,15 @@ fun TaskListScreen(modifier: Modifier = Modifier, vm: TaskListViewModel = hiltVi
         }
     }
 
-    TaskListScreen(uiState, vm::onAction, modifier, snackbarHostState)
+    TaskListScreen(uiState, onAddTask, onEditTask, vm::onAction, modifier, snackbarHostState)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TaskListScreen(
     state: TaskListState,
+    onAddTask: () -> Unit,
+    onEditTask: (Long) -> Unit,
     onAction: (TaskListAction) -> Unit,
     modifier: Modifier = Modifier,
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
@@ -90,7 +97,7 @@ fun TaskListScreen(
             TaskList(
                 state.tasks,
                 { task ->
-                    onAction(TaskListAction.EditTask(task.copy(isDone = !task.isDone)))
+                    onEditTask(task.id)
                 },
                 { task, isChecked ->
                     onAction(TaskListAction.EditTask(task.copy(isDone = isChecked)))
@@ -100,7 +107,7 @@ fun TaskListScreen(
             )
 
             TextButton(
-                onClick = { showAddTask = true },
+                onClick = onAddTask,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Icon(
@@ -135,6 +142,8 @@ fun TaskScreenPreview(modifier: Modifier = Modifier) {
     TodoTheme {
         TaskListScreen(
             state = state,
+            onAddTask = {},
+            onEditTask = {},
             onAction = {}
         )
     }

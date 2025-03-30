@@ -2,6 +2,7 @@ package com.cy.practice.todo.data.repository
 
 import com.cy.practice.todo.data.local.TaskDao
 import com.cy.practice.todo.data.mapper.toEntity
+import com.cy.practice.todo.data.mapper.toModel
 import com.cy.practice.todo.data.mapper.toModelList
 import com.cy.practice.todo.domain.model.Task
 import com.cy.practice.todo.domain.repository.TaskRepository
@@ -21,6 +22,10 @@ class DefaultTaskRepository(
 
     override suspend fun deleteTask(task: Task) {
         taskDao.deleteTask(task.toEntity())
+    }
+
+    override suspend fun getTaskById(taskId: Long): Task {
+        return taskDao.getTaskById(taskId).toModel()
     }
 
     override fun observeTaskList(): Flow<List<Task>> {
