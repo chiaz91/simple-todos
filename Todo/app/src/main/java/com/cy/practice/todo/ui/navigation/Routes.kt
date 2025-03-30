@@ -9,4 +9,7 @@ sealed interface Routes {
 
     @Serializable
     data object AddTask : Routes
+
+    @Serializable
+    data class EditTask(val taskId: Long) : Routes
 }

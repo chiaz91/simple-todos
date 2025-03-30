@@ -42,6 +42,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun TaskListScreen(
     onAddTask: () -> Unit,
+    onEditTask: (Long) -> Unit,
     modifier: Modifier = Modifier,
     vm: TaskListViewModel = hiltViewModel()
 ) {
@@ -68,7 +69,7 @@ fun TaskListScreen(
         }
     }
 
-    TaskListScreen(uiState, onAddTask, vm::onAction, modifier, snackbarHostState)
+    TaskListScreen(uiState, onAddTask, onEditTask, vm::onAction, modifier, snackbarHostState)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -76,6 +77,7 @@ fun TaskListScreen(
 fun TaskListScreen(
     state: TaskListState,
     onAddTask: () -> Unit,
+    onEditTask: (Long) -> Unit,
     onAction: (TaskListAction) -> Unit,
     modifier: Modifier = Modifier,
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
@@ -95,7 +97,7 @@ fun TaskListScreen(
             TaskList(
                 state.tasks,
                 { task ->
-                    onAction(TaskListAction.EditTask(task.copy(isDone = !task.isDone)))
+                    onEditTask(task.id)
                 },
                 { task, isChecked ->
                     onAction(TaskListAction.EditTask(task.copy(isDone = isChecked)))
@@ -141,6 +143,7 @@ fun TaskScreenPreview(modifier: Modifier = Modifier) {
         TaskListScreen(
             state = state,
             onAddTask = {},
+            onEditTask = {},
             onAction = {}
         )
     }

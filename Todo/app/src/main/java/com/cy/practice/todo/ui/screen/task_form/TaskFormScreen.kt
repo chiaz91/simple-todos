@@ -70,7 +70,10 @@ fun TaskFormScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("New Task") },
+                title = {
+                    val title = if (uiState.isEditMode) "Edit Task" else "New Task"
+                    Text(title)
+                },
 
                 navigationIcon = {
                     IconButton(onClick = { onSaved(false) }) {
