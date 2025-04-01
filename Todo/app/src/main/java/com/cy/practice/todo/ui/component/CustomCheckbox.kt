@@ -7,6 +7,7 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -27,8 +28,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
@@ -42,6 +43,7 @@ fun CustomCheckbox(
     onValueChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
     size: Int = 24,
+    shape: Shape = CircleShape,
     colors: CheckboxColors = defaultCheckboxColors()
 ) {
     val transition = updateTransition(targetState = isChecked, label = "Check Transition")
@@ -73,13 +75,11 @@ fun CustomCheckbox(
         modifier = modifier
             .size(size.dp)
             .graphicsLayer(scaleX = scale, scaleY = scale)
-            .drawBehind {
-                drawCircle(color = backgroundColor, radius = size.dp.toPx() / 2)
-            }
+            .background(color = backgroundColor, shape = shape)
             .border(
                 width = 1.5.dp,
                 color = colors.borderColor,
-                shape = CircleShape
+                shape = shape
             )
             .padding(4.dp)
             .toggleable(
