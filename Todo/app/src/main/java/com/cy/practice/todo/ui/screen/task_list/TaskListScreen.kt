@@ -28,6 +28,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.datasource.LoremIpsum
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cy.practice.todo.R
@@ -135,8 +136,9 @@ fun TaskListScreen(
 fun TaskScreenPreview(modifier: Modifier = Modifier) {
     val state = TaskListState(
         tasks = listOf(
-            Task(0, "Do homework", "", true),
-            Task(1, "Do exercise", "", false)
+            Task(1, "Task 1", "", false),
+            Task(2, "Task 2", LoremIpsum().toString(), false),
+            Task(3, "Task 3", LoremIpsum().toString(), true)
         )
     )
     TodoTheme {

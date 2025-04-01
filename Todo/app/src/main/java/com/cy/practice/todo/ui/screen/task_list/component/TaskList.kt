@@ -3,16 +3,18 @@ package com.cy.practice.todo.ui.screen.task_list.component
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.StickyNote2
+import androidx.compose.material.icons.automirrored.filled.Notes
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
@@ -23,6 +25,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -30,8 +36,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.datasource.LoremIpsum
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.cy.practice.todo.domain.model.Task
+import com.cy.practice.todo.ui.component.CustomCheckbox
+import com.cy.practice.todo.ui.component.defaultCheckboxColors
 import com.cy.practice.todo.ui.theme.TodoTheme
 
 
@@ -72,11 +82,15 @@ private fun TaskItem(
 ) {
     ListItem(
         leadingContent = {
-            Checkbox(
-                checked = task.isDone,
-                onCheckedChange = { check ->
-                    onCheckChanged(task, check)
-                },
+            CustomCheckbox(
+                task.isDone,
+                { onCheckChanged(task, it) },
+                colors = defaultCheckboxColors().copy(
+                    checkedBackground = Color.Transparent,
+                    uncheckedBackground = Color.Transparent,
+                    borderColor = MaterialTheme.colorScheme.primary,
+                    checkMark = MaterialTheme.colorScheme.primary,
+                )
             )
         },
         headlineContent = {
@@ -87,14 +101,24 @@ private fun TaskItem(
                 overflow = TextOverflow.Ellipsis
             )
         },
-        trailingContent = {
+        supportingContent = {
             if (task.note.isNotEmpty()) {
-                Icon(
-                    Icons.AutoMirrored.Default.StickyNote2,
-                    contentDescription = "",
-                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-                    modifier = Modifier.size(20.dp)
-                )
+                Row {
+                    Icon(
+                        Icons.AutoMirrored.Default.Notes,
+                        contentDescription = "note",
+                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(Modifier.width(4.dp))
+                    Text(
+                        text = task.note,
+                        textDecoration = if (task.isDone) TextDecoration.LineThrough else TextDecoration.None,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        fontSize = 12.sp
+                    )
+                }
             }
         },
         modifier = modifier
@@ -178,7 +202,6 @@ private fun TaskItemDismissBackground(
                     contentDescription = "Delete task",
                     tint = MaterialTheme.colorScheme.onErrorContainer,
                     modifier = Modifier.align(Alignment.CenterEnd)
-
                 )
             }
 
@@ -191,9 +214,29 @@ private fun TaskItemDismissBackground(
 @Preview(showBackground = true)
 @Composable
 fun TaskItemPreview(modifier: Modifier = Modifier) {
-    val task = Task(0, "Task 1", "", true)
+    var task by remember {
+        mutableStateOf(Task(0, "Task 1", LoremIpsum().toString(), false))
+    }
 
     TodoTheme {
-        SwipeableTaskItem(task, { _, _ -> }, {})
+        SwipeableTaskItem(
+            task,
+            { _, checked -> task = task.copy(isDone = checked) },
+            {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun TaskListPreview(modifier: Modifier = Modifier) {
+    val taskList = listOf(
+        Task(1, "Task 1", "", false),
+        Task(2, "Task 2", LoremIpsum().toString(), false),
+        Task(3, "Task 3", LoremIpsum().toString(), true),
+    )
+
+    TodoTheme {
+        TaskList(taskList, {}, { _, _ -> }, {})
     }
 }
