@@ -3,6 +3,7 @@ package com.cy.practice.todo.ui.screen.task_form
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.cy.practice.todo.MainCoroutineRule
+import com.cy.practice.todo.common.TestDispatcherProvider
 import com.cy.practice.todo.data.repository.FakeTaskRepository
 import com.cy.practice.todo.domain.model.Task
 import com.cy.practice.todo.mockkToRoute
@@ -25,6 +26,7 @@ class EditTaskFormViewModelTest {
     private lateinit var savedStateHandle: SavedStateHandle
     private lateinit var fakeTaskRepository: FakeTaskRepository
     private lateinit var viewModel: EditTaskViewModel
+    private val dispatcherProvider = TestDispatcherProvider(mainCoroutineRule.testDispatcher)
 
     val task1 = Task(1, "Task 1", "Task 1's Note", false)
     val initialState = TaskFormState(
@@ -42,7 +44,7 @@ class EditTaskFormViewModelTest {
         viewModel = EditTaskViewModel(
             savedStateHandle,
             fakeTaskRepository,
-            mainCoroutineRule.testDispatcher
+            dispatcherProvider
         )
     }
 
