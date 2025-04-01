@@ -32,7 +32,7 @@ class EditTaskViewModel @Inject constructor(
     private fun loadTaskData(taskId: Long) {
         viewModelScope.launch {
             editingTask = withContext(ioDispatcher) {
-                repository.getTaskById(taskId)
+                repository.getTaskById(taskId) ?: throw NullPointerException()
             }
 
             _uiState.update {
