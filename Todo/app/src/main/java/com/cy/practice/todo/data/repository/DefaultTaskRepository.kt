@@ -24,8 +24,8 @@ class DefaultTaskRepository(
         taskDao.deleteTask(task.toEntity())
     }
 
-    override suspend fun getTaskById(taskId: Long): Task {
-        return taskDao.getTaskById(taskId).toModel()
+    override suspend fun getTaskById(taskId: Long): Task? {
+        return taskDao.getTaskById(taskId)?.toModel()
     }
 
     override fun observeTaskList(): Flow<List<Task>> {

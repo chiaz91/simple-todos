@@ -15,3 +15,7 @@ fun Task.toEntity() = TaskEntity(
 fun List<TaskEntity>.toModelList(): List<Task> {
     return this.map { it.toModel() }
 }
+
+fun List<Task>.toEntityList(): List<TaskEntity> {
+    return this.map { it.toEntity() }
+}
